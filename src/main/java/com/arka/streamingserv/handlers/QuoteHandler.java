@@ -14,6 +14,7 @@ import reactor.core.publisher.Mono;
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.web.reactive.function.server.ServerResponse.notFound;
 import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
 @Component

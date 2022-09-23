@@ -1,10 +1,12 @@
 package com.arka.streamingserv.service.impl;
 
+import com.arka.helperlib.Exception.ServiceException;
 import com.arka.streamingserv.service.CacheService;
 import com.arka.streamingserv.service.VendorProductMngtService;
 import com.arka.streamingserv.service.webclient.VendorProductMgmtFeignClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -37,7 +39,7 @@ public class VendorProductMngtServiceImpl implements VendorProductMngtService {
                     System.out.println("Initiating service call to get products");
                     return vendorProductMgmtFeignClient.getProducts(queryMap, headerMap)
                             .doOnNext(resultJson -> {
-                                System.out.println("Products ::\t"+ responseJson);
+                                System.out.println("Products ::\t"+ resultJson.size());
                                 cacheService.putValueInCache(queryMapString, resultJson);
                             });
                 });
