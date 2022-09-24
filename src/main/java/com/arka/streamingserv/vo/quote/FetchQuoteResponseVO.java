@@ -5,10 +5,10 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class FetchQuoteVO {
+public class FetchQuoteResponseVO {
 
     private String enquiryId;
 
-    private List<QuoteVO> items;
+    private List<QuoteResVO> items;
 
 }

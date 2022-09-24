@@ -7,7 +7,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Data
-public class FetchQuoteReqVO {
+public class QuoteReqVO {
 
     @NotBlank(message = "enquiry.id.required")
     private String enquiryId;
