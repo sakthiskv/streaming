@@ -11,5 +11,14 @@ import java.util.Map;
 
 public interface VendorProductMngtService {
 
+    Mono<JsonNode> getCategories(@SpringQueryMap Map<String, List<String>> queryMap, @RequestHeader Map<String, List<String>> headerMap);
+
+    Mono<JsonNode> getCategoryAttributesById(@PathVariable String categoryId, @SpringQueryMap Map<String, List<String>> queryMap, @RequestHeader Map<String, List<String>> headerMap);
+
     Mono<JsonNode> getProducts(@SpringQueryMap Map<String, List<String>> queryMap, @RequestHeader Map<String, List<String>> headerMap);
+
+    Mono<JsonNode> getProductFeaturesV2(@SpringQueryMap Map<String, List<String>> queryMap, @RequestHeader Map<String, List<String>> headerMap);
+
+    Mono<JsonNode> getAddons(@SpringQueryMap Map<String, List<String>> queryMap,  @RequestHeader Map<String, List<String>> headerMap);
+
 }

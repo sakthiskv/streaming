@@ -6,6 +6,7 @@ import com.arka.streamingserv.vo.quote.FetchQuoteResponseVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
@@ -24,8 +25,8 @@ public class QuoteHandler {
     public Mono<ServerResponse> getAllQuotes(ServerRequest serverRequest) {
         Map<String, String> headers = serverRequest.headers().asHttpHeaders().toSingleValueMap();
         Mono<QuoteReqVO> fetchQuoteReqVOMono = serverRequest.bodyToMono(QuoteReqVO.class);
-        System.out.println("came inside sakthi");
         Flux<FetchQuoteResponseVO> quoteVOFlux = quoteService.fetchQuotes(headers, fetchQuoteReqVOMono);
-        return ok().contentType(MediaType.APPLICATION_NDJSON).body(quoteVOFlux, FetchQuoteResponseVO.class);
+        return ok().contentType(MediaType.APPLICATION_NDJSON)
+                .body(quoteVOFlux, FetchQuoteResponseVO.class);
     }
 }

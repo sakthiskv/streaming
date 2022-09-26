@@ -20,7 +20,7 @@ public class QuoteServiceRouter {
     @Bean
     public RouterFunction<ServerResponse> QuoteServiceRouterFucntion() {
         return RouterFunctions.route()
-                .POST("/v1/streamingserv/fetch-quotes", accept(APPLICATION_JSON), quoteHandler::getAllQuotes)
+                .POST("/v1/streaming/fetch-quotes", accept(APPLICATION_JSON), quoteHandler::getAllQuotes)
                 .build();
     }
 

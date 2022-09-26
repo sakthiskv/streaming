@@ -66,9 +66,9 @@ public class AuthenticationWebFilter implements WebFilter {
                     });
         }
         String token = jwtProvider.resolveToken(serverWebExchange.getRequest());
-//        if(Objects.nonNull(token) && jwtProvider.validateToken(token)) {
-//            return jwtProvider.getSecurityContext(token);
-//        }
+        if(Objects.nonNull(token) && jwtProvider.validateToken(token)) {
+            return jwtProvider.getSecurityContext(token);
+        }
         return SecurityContext.builder().build();
     }
 

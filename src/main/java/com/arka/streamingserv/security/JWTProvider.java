@@ -50,6 +50,8 @@ public class JWTProvider {
         if(Objects.nonNull(claims)) {
             return securityContext.toBuilder()
                     .subject(claims.get(USER_ID).toString())
+                    .tenantId(claims.get("tenantId").toString())
+                    .referrerCode(Objects.nonNull(claims.get("referrerCode")) ? claims.get("referrerCode").toString() : null)
                     .privileges(claims.get(PRIVILEGES, List.class))
                     .build();
         }
@@ -75,13 +77,12 @@ public class JWTProvider {
         } catch (ExpiredJwtException e) {
             ObjectNode errorJson = JsonUtils.newJsonObject();
             errorJson.put(JsonUtils.ERROR, ErrorMessageKey.AUTH_TOKEN_EXPIRED.getValue());
-//            throw new ServiceException(ErrorUtils.formUnauthorizedErrorVO(errorJson), HttpStatus.UNAUTHORIZED);
+            throw new ServiceException(ErrorUtils.formUnauthorizedErrorVO(errorJson), HttpStatus.UNAUTHORIZED);
         } catch(JwtException e) {
             ObjectNode errorJson = JsonUtils.newJsonObject();
             errorJson.put(JsonUtils.ERROR, ErrorMessageKey.INVALID_TOKEN.getValue());
-//            throw new ServiceException(ErrorUtils.formUnauthorizedErrorVO(errorJson), HttpStatus.UNAUTHORIZED);
+            throw new ServiceException(ErrorUtils.formUnauthorizedErrorVO(errorJson), HttpStatus.UNAUTHORIZED);
         }
-        return true;
     }
 
 }

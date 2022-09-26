@@ -18,9 +18,8 @@ public class CacheServiceImpl implements CacheService {
 
     @Override
     public void putValueInCache(String key, JsonNode value){
-
+        System.out.println(key);
         CACHE.put(key,value);
-
     }
 
     @Override

@@ -17,4 +17,17 @@ public interface VendorProductMgmtFeignClient {
     @GetMapping("/v1/catalog/products")
     Mono<JsonNode> getProducts(@SpringQueryMap Map<String, List<String>> queryMap, @RequestHeader Map<String, List<String>> headerMap);
 
+
+    @GetMapping("/v1/catalog/categories")
+    Mono<JsonNode> getCategories(@SpringQueryMap Map<String, List<String>> queryMap, @RequestHeader Map<String, List<String>> headerMap);
+
+    @GetMapping("/v1/catalog/categories/{categoryId}/attributes//")
+    Mono<JsonNode> getCategoryAttributesById(@PathVariable String categoryId, @SpringQueryMap Map<String, List<String>> queryMap, @RequestHeader Map<String, List<String>> headerMap);
+
+    @GetMapping("/v2/catalog/product-features")
+    Mono<JsonNode> getProductFeaturesV2(@SpringQueryMap Map<String, List<String>> queryMap, @RequestHeader Map<String, List<String>> headerMap);
+
+    @GetMapping("/v1/catalog/addons")
+    Mono<JsonNode> getAddons(@SpringQueryMap Map<String, List<String>> queryMap, @RequestHeader Map<String, List<String>> headerMap);
+
 }

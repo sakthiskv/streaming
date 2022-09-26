@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class QuoteResVO {
 
-    private int tenure;
+//    private int tenure;
 
     private String productCode;
 

@@ -14,4 +14,8 @@ public class FetchPlanRequestVO {
 
     private String productId;
 
+    private String categoryId;
+
+    private String productCode;
+
 }
