@@ -81,7 +81,7 @@ public class QuoteServiceImpl implements QuoteService {
                     queryParam.put("category_id", Collections.singletonList(categoryId));
                     Mono<JsonNode> addonMono = vendorProductMngtService.getAddons(queryParam, headerMap);
                     Mono<CategoryAttributeDTO> categoryAttributeDTOMono = categoryConfig.getCategoryAttributesDetails(categoryId);
-                    return Flux.fromIterable(fetchPlanRequestVOList).flatMap(fetchPlanRequestVO -> {
+                    return Flux.fromIterable(fetchPlanRequestVOList).delayElements(Duration.ofSeconds(4)).flatMap(fetchPlanRequestVO -> {
                         fetchQuoteResponseVO.setErrorMsg(fetchPlanRequestVO.getProductCode() + ".Unable to get quote");
                         System.out.println("\nrequest \t\t" + JsonUtils.toJson(fetchPlanRequestVO));
                         Mono<JsonNode> quoteResponseMono = procurementSevrvFeignClient.fetchPlan(headerMap, JsonUtils.toJson(fetchPlanRequestVO));
