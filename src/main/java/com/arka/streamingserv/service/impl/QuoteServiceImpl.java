@@ -21,10 +21,11 @@ import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
-public class QuoteServiceImpl  {
+public class QuoteServiceImpl implements QuoteService {
 
     public static final String ITEMS = "items";
     public static final String CODE = "code";
@@ -45,7 +46,7 @@ public class QuoteServiceImpl  {
     @Autowired
     CategoryConfig categoryConfig;
 
-//    @Override
+    @Override
     public Flux<FetchQuoteResponseVO> fetchQuotes(Map<String, String> headers, Mono<QuoteReqVO> fetchQuoteReqVOMono) {
         System.out.println("\n\n\n Headers \t" + headers);
         Map<String, List<String>> headerMap = new HashMap<>();
@@ -60,18 +61,19 @@ public class QuoteServiceImpl  {
                 quoteRequestVO.setEnquiryId(fetchPlanRequestVO.getEnquiryId());
                 quoteRequestVO.setTenure(fetchPlanRequestVO.getTenure());
                 quoteRequestVO.setProductId(fetchPlanRequestVO.getProductId());
+                System.out.println("\n\nInitiating fetch plan call for following code and id : : " + fetchPlanRequestVO.getProductCode() + "\t" + fetchPlanRequestVO.getProductId());
                 fetchQuoteResponseVO.setErrorMsg(fetchPlanRequestVO.getProductCode() + ".Unable to get quote");
-                System.out.println("\nrequest \t\t"+ JsonUtils.toJson(quoteRequestVO));
+                System.out.println("\n\nrequest \t\t" + JsonUtils.toJson(quoteRequestVO));
                 return procurementSevrvFeignClient.fetchPlan(headerMap, JsonUtils.toJson(quoteRequestVO))
                         .flatMap(quoteResponse -> {
                             JsonNode addonJson = fetchPlanRequestVO.getAddonJson();
                             CategoryAttributeDTO categoryAttributeDTO = fetchPlanRequestVO.getCategoryAttributeDTO();
-                            System.out.println("\nQuote api call response:: \t" + quoteResponse);
-                            return Mono.just(fetchQuoteResponseVO);
-//                            return populateResponse(quoteRequestVO, quoteResponse, addonJson, categoryAttributeDTO, headerMap).flatMap(fetchQuoteResponse -> {
-//                                System.out.println("\n After response rewrite quote response ::" + JsonUtils.toJson(fetchQuoteResponse));
-//                                return Mono.just(fetchQuoteResponse);
-//                            });
+//                            System.out.println("\nQuote api call response:: \t" + quoteResponse);
+//                            return Mono.just(fetchQuoteResponseVO);
+                            return populateResponse(quoteRequestVO, quoteResponse, addonJson, categoryAttributeDTO, headerMap).flatMap(fetchQuoteResponse -> {
+                                System.out.println("\n After response rewrite quote response ::" + JsonUtils.toJson(fetchQuoteResponse));
+                                return Mono.just(fetchQuoteResponse);
+                            });
                         }).doOnError(e -> {
                             System.out.println("Inside doOnError::\t" + e.getMessage());
                             fetchQuoteResponseVO.setEnquiryId(fetchPlanRequestVO.getEnquiryId());
@@ -91,10 +93,10 @@ public class QuoteServiceImpl  {
     private Flux<FetchPlanRequestVO> formRequest(Map<String, List<String>> headers, Mono<QuoteReqVO> fetchQuoteReqVOMono) {
         Map<String, List<String>> queryMap = new HashMap<>();
         queryMap.put(CriteriaUtils.NO_OF_RECORDS, Collections.singletonList(CriteriaUtils.ALL_RECORDS_VALUE));
+        List<FetchPlanRequestVO> fetchPlanRequestVOList = new ArrayList<>();
         return fetchQuoteReqVOMono.flatMapMany(quoteReqVO -> {
-            List<FetchPlanRequestVO> fetchPlanRequestVOList = new ArrayList<>();
             AtomicReference<String> categoryId = new AtomicReference<>("");
-            return vendorProductMngtService.getProducts(queryMap, headers).flatMapMany(productRes -> {
+            return vendorProductMngtService.getProducts(queryMap, headers).flux().flatMap(productRes -> {
                 productRes.get(ITEMS).forEach(product -> {
                     if (Objects.isNull(quoteReqVO.getProductCode())) {
                         System.out.println("product code and ID ::\t" + product.get(CODE) + "\t" + product.get(ID).asText());
@@ -110,13 +112,18 @@ public class QuoteServiceImpl  {
                 queryParam.put("category_id", Collections.singletonList(categoryId.get()));
                 Mono<JsonNode> addonMono = vendorProductMngtService.getAddons(queryParam, headers);
                 Mono<CategoryAttributeDTO> categoryAttributeDTOMono = categoryConfig.getCategoryAttributesDetails(categoryId.get());
-                return Flux.fromIterable(fetchPlanRequestVOList).flatMap(fetchPlanRequestVO -> Mono.zip(addonMono, categoryAttributeDTOMono).flatMapIterable(objects -> {
+                AtomicInteger i = new AtomicInteger();
+                return Mono.zip(addonMono, categoryAttributeDTOMono).flatMapIterable(objects -> {
                     JsonNode addonJson = objects.getT1();
                     CategoryAttributeDTO categoryAttributeDTO = objects.getT2();
-                    fetchPlanRequestVO.setAddonJson(addonJson);
-                    fetchPlanRequestVO.setCategoryAttributeDTO(categoryAttributeDTO);
+                    fetchPlanRequestVOList.forEach(fetchPlanRequestVO -> {
+                        System.out.println("\nvele ::\t" + i.getAndIncrement());
+                        fetchPlanRequestVO.setAddonJson(addonJson);
+                        fetchPlanRequestVO.setCategoryAttributeDTO(categoryAttributeDTO);
+                    });
                     return fetchPlanRequestVOList;
-                }));
+                });
+
             }).doOnError(e -> {
                 System.out.println("Getting Exception while doing get products call :: " + e.getMessage());
                 Mono.error(new ServiceException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR));

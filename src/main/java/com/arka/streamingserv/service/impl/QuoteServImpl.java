@@ -17,7 +17,7 @@ import java.time.Duration;
 import java.util.*;
 
 @Service
-public class QuoteServImpl implements QuoteService {
+public class QuoteServImpl  {
 
     private static double VENDOR_TAX_PERCENTAGE = 18;
 
@@ -29,7 +29,7 @@ public class QuoteServImpl implements QuoteService {
 
     List<String> productCodes = new ArrayList<>(Arrays.asList("HDFCERGO_HEALTH_1", "HDFCERGO_HEALTH_2", "HDFCERGO_HEALTH_3", "HDFCERGO_HEALTH_4"));
 
-    @Override
+//    @Override
     public Flux<FetchQuoteResponseVO> fetchQuotes(Map<String, String> headers, Mono<QuoteReqVO> fetchQuoteReqVOMono) {
         System.out.println(JsonUtils.toJson(fetchQuoteReqVOMono));
         System.out.println("came to service layer");
