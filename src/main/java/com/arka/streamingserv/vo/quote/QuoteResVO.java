@@ -8,7 +8,7 @@ public class QuoteResVO {
 
 //    private int tenure;
 
-    private String productCode = "Sakthi skv";
+    private String productCode;
 
     private InsurerVO insurer;
 

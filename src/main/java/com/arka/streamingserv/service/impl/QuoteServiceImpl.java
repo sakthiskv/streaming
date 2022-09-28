@@ -62,7 +62,7 @@ public class QuoteServiceImpl implements QuoteService {
                 quoteRequestVO.setTenure(fetchPlanRequestVO.getTenure());
                 quoteRequestVO.setProductId(fetchPlanRequestVO.getProductId());
                 System.out.println("\n\nInitiating fetch plan call for following code and id : : " + fetchPlanRequestVO.getProductCode() + "\t" + fetchPlanRequestVO.getProductId());
-                fetchQuoteResponseVO.setErrorMsg(fetchPlanRequestVO.getProductCode() + ".Unable to get quote");
+//                fetchQuoteResponseVO.setErrorMsg(fetchPlanRequestVO.getProductCode() + ".Unable to get quote");
                 System.out.println("\n\nrequest \t\t" + JsonUtils.toJson(quoteRequestVO));
                 return procurementSevrvFeignClient.fetchPlan(headerMap, JsonUtils.toJson(quoteRequestVO))
                         .flatMap(quoteResponse -> {
@@ -76,12 +76,12 @@ public class QuoteServiceImpl implements QuoteService {
                             });
                         }).doOnError(e -> {
                             System.out.println("Inside doOnError::\t" + e.getMessage());
-                            fetchQuoteResponseVO.setEnquiryId(fetchPlanRequestVO.getEnquiryId());
+//                            fetchQuoteResponseVO.setEnquiryId(fetchPlanRequestVO.getEnquiryId());
                             Flux.just(fetchQuoteResponseVO);
                         });
             }).doOnError(e -> {
                 System.out.println("Inside 2 doOnError::\t" + e.getMessage());
-                fetchQuoteResponseVO.setErrorMsg("Given product code is not available.");
+//                fetchQuoteResponseVO.setErrorMsg("Given product code is not available.");
                 Flux.just(fetchQuoteResponseVO);
             });
         } catch (Exception e) {
@@ -136,7 +136,7 @@ public class QuoteServiceImpl implements QuoteService {
 
     private Mono<FetchQuoteResponseVO> populateResponse(QuoteRequestVO quoteRequestVO, JsonNode responseJson, JsonNode addonJson, CategoryAttributeDTO categoryAttributeDTO, Map<String, List<String>> headers) {
         FetchQuoteResponseVO fetchQuoteResponseVO = new FetchQuoteResponseVO();
-        fetchQuoteResponseVO.setProductCode(quoteRequestVO.getProductCode());
+//        fetchQuoteResponseVO.setProductCode(quoteRequestVO.getProductCode());
         try {
             if (JsonUtils.isValidField(responseJson, OUTPUT_QUOTE_PARAMS)
                     && JsonUtils.isValidField(responseJson.get(OUTPUT_QUOTE_PARAMS), JsonUtils.JSON_ARRAY_ITEMS_KEY)
@@ -168,18 +168,18 @@ public class QuoteServiceImpl implements QuoteService {
                             quotes.add(quoteVO);
 
                     });
-                    fetchQuoteResponseVO.setEnquiryId(responseJson.get("enquiryId").asText());
-                    fetchQuoteResponseVO.setTenure(quoteRequestVO.getTenure());
+//                    fetchQuoteResponseVO.setEnquiryId(responseJson.get("enquiryId").asText());
+//                    fetchQuoteResponseVO.setTenure(quoteRequestVO.getTenure());
                     fetchQuoteResponseVO.setItems(quotes);
                     return Mono.just(fetchQuoteResponseVO);
                 }
-                fetchQuoteResponseVO.setErrorMsg("Unable to get Quotes.");
+//                fetchQuoteResponseVO.setErrorMsg("Unable to get Quotes.");
                 return Mono.just(fetchQuoteResponseVO);
             }
-            fetchQuoteResponseVO.setErrorMsg("Unable to get Quotes.");
+//            fetchQuoteResponseVO.setErrorMsg("Unable to get Quotes.");
             return Mono.just(fetchQuoteResponseVO);
         } catch (Exception e) {
-            fetchQuoteResponseVO.setErrorMsg("Exception occurred.");
+//            fetchQuoteResponseVO.setErrorMsg("Exception occurred.");
             return Mono.just(fetchQuoteResponseVO);
         }
     }
