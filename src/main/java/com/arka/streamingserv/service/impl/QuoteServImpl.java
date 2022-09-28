@@ -95,7 +95,7 @@ public class QuoteServImpl  {
                 quoteResVO.setPremiumWithoutTax(premiumVO);
                 quotes.add(quoteResVO);
             });
-            fetchQuoteResponseVO.setEnquiryId(responseJson.get("enquiryId").asText());
+//            fetchQuoteResponseVO.setEnquiryId(responseJson.get("enquiryId").asText());
             fetchQuoteResponseVO.setItems(quotes);
             return fetchQuoteResponseVO;
         }
