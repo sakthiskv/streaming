@@ -54,7 +54,7 @@ public class QuoteServiceImpl implements QuoteService {
         Flux<FetchPlanRequestVO> fetchPlanRequestVOFlux = formRequest(headerMap, fetchQuoteReqVOMono);
         FetchQuoteResponseVO fetchQuoteResponseVO = new FetchQuoteResponseVO();
         try {
-            return fetchPlanRequestVOFlux.delayElements(Duration.ofSeconds(2)).flatMap(fetchPlanRequestVO -> {
+            return fetchPlanRequestVOFlux.flatMap(fetchPlanRequestVO -> {
                 QuoteRequestVO quoteRequestVO = new QuoteRequestVO();
                 quoteRequestVO.setCategoryId(fetchPlanRequestVO.getCategoryId());
                 quoteRequestVO.setProductCode(fetchPlanRequestVO.getProductCode());
