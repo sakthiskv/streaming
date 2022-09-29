@@ -10,6 +10,8 @@ public class QuoteResVO {
 
     private String productCode;
 
+    private String errorMessage;
+
     private InsurerVO insurer;
 
     private String quoteKey;

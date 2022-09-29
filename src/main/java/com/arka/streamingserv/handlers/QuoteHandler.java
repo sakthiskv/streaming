@@ -2,7 +2,6 @@ package com.arka.streamingserv.handlers;
 
 import com.arka.streamingserv.service.QuoteService;
 import com.arka.streamingserv.vo.quote.QuoteReqVO;
-import com.arka.streamingserv.vo.quote.FetchQuoteResponseVO;
 import com.arka.streamingserv.vo.quote.QuoteResVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -27,9 +26,9 @@ public class QuoteHandler {
     public Mono<ServerResponse> getAllQuotes(ServerRequest serverRequest) {
         Map<String, String> headers = serverRequest.headers().asHttpHeaders().toSingleValueMap();
         Mono<QuoteReqVO> fetchQuoteReqVOMono = serverRequest.bodyToMono(QuoteReqVO.class);
-        Flux<FetchQuoteResponseVO> quoteVOFlux = quoteService.fetchQuotes(headers, fetchQuoteReqVOMono);
+        Flux<QuoteResVO> quoteVOFlux = quoteService.fetchQuotes(headers, fetchQuoteReqVOMono);
         return ok().contentType(MediaType.APPLICATION_NDJSON)
-                .body(quoteVOFlux, FetchQuoteResponseVO.class);
+                .body(quoteVOFlux, QuoteResVO.class);
 //        return ServerResponse.ok()
 //                .contentType(MediaType.APPLICATION_NDJSON)
 ////                .header("Content-Disposition", "inline")

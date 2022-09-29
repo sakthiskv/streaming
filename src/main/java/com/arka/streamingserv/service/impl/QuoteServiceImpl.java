@@ -4,6 +4,7 @@ import com.arka.helperlib.Exception.ServiceException;
 import com.arka.helperlib.constants.enums.CurrencyCode;
 import com.arka.helperlib.utils.CriteriaUtils;
 import com.arka.helperlib.utils.JsonUtils;
+import com.arka.streamingserv.constants.ErrorMessageKey;
 import com.arka.streamingserv.dto.AttributeDTO;
 import com.arka.streamingserv.dto.CategoryAttributeDTO;
 import com.arka.streamingserv.service.QuoteService;
@@ -47,12 +48,12 @@ public class QuoteServiceImpl implements QuoteService {
     CategoryConfig categoryConfig;
 
     @Override
-    public Flux<FetchQuoteResponseVO> fetchQuotes(Map<String, String> headers, Mono<QuoteReqVO> fetchQuoteReqVOMono) {
+    public Flux<QuoteResVO> fetchQuotes(Map<String, String> headers, Mono<QuoteReqVO> fetchQuoteReqVOMono) {
         System.out.println("\n\n\n Headers \t" + headers);
         Map<String, List<String>> headerMap = new HashMap<>();
         headers.entrySet().stream().forEach(header -> headerMap.put(header.getKey(), Collections.singletonList(header.getValue())));
         Flux<FetchPlanRequestVO> fetchPlanRequestVOFlux = formRequest(headerMap, fetchQuoteReqVOMono);
-        FetchQuoteResponseVO fetchQuoteResponseVO = new FetchQuoteResponseVO();
+        QuoteResVO quoteResVO =  new QuoteResVO();
         try {
             return fetchPlanRequestVOFlux.flatMap(fetchPlanRequestVO -> {
                 QuoteRequestVO quoteRequestVO = new QuoteRequestVO();
@@ -76,13 +77,14 @@ public class QuoteServiceImpl implements QuoteService {
                             });
                         }).doOnError(e -> {
                             System.out.println("Inside doOnError::\t" + e.getMessage());
-//                            fetchQuoteResponseVO.setEnquiryId(fetchPlanRequestVO.getEnquiryId());
-                            Flux.just(fetchQuoteResponseVO);
+                            quoteResVO.setErrorMessage(ErrorMessageKey.UNABLE_TO_GET_QUOTE_FROM_VENDOR.getValue());
+                            quoteResVO.setProductCode(quoteRequestVO.getProductCode());
+                            Flux.just(quoteResVO);
                         });
             }).doOnError(e -> {
                 System.out.println("Inside 2 doOnError::\t" + e.getMessage());
-//                fetchQuoteResponseVO.setErrorMsg("Given product code is not available.");
-                Flux.just(fetchQuoteResponseVO);
+                quoteResVO.setErrorMessage(ErrorMessageKey.UNABLE_TO_GET_QUOTE_FROM_VENDOR.getValue());
+                Flux.just(quoteResVO);
             });
         } catch (Exception e) {
             System.out.println("\n\nException Occurred \t" + e.getMessage());
@@ -134,9 +136,9 @@ public class QuoteServiceImpl implements QuoteService {
         });
     }
 
-    private Mono<FetchQuoteResponseVO> populateResponse(QuoteRequestVO quoteRequestVO, JsonNode responseJson, JsonNode addonJson, CategoryAttributeDTO categoryAttributeDTO, Map<String, List<String>> headers) {
-        FetchQuoteResponseVO fetchQuoteResponseVO = new FetchQuoteResponseVO();
-//        fetchQuoteResponseVO.setProductCode(quoteRequestVO.getProductCode());
+    private Mono<QuoteResVO> populateResponse(QuoteRequestVO quoteRequestVO, JsonNode responseJson, JsonNode addonJson, CategoryAttributeDTO categoryAttributeDTO, Map<String, List<String>> headers) {
+        QuoteResVO quoteResVO = new QuoteResVO();
+        quoteResVO.setProductCode(quoteRequestVO.getProductCode());
         try {
             if (JsonUtils.isValidField(responseJson, OUTPUT_QUOTE_PARAMS)
                     && JsonUtils.isValidField(responseJson.get(OUTPUT_QUOTE_PARAMS), JsonUtils.JSON_ARRAY_ITEMS_KEY)
@@ -147,8 +149,8 @@ public class QuoteServiceImpl implements QuoteService {
                 if (isValidCategoryResp(categoryAttributeDTO, responseJson) && isValidAddonJson(addonJson, responseJson)) {
                     List<String> addonPremiumAttributes = getAddonPremiumAttributes(addonJson);
                     responseJson.get("output_quote_params").get(JsonUtils.JSON_ARRAY_ITEMS_KEY).forEach(outputQuoteParamJson -> {
-                        JsonNode attributesJson = outputQuoteParamJson.get("attributes");
                         QuoteResVO quoteVO = new QuoteResVO();
+                        JsonNode attributesJson = outputQuoteParamJson.get("attributes");
                         MoneyVO sumInsuredMoneyVO = new MoneyVO(attributesJson.get("AH-PRODUCT_SUM_INSURED").get("value").asDouble(), CurrencyCode.INR);
                         quoteVO.setSumInsured(sumInsuredMoneyVO);
                         quoteVO.setQuoteKey(outputQuoteParamJson.get("quoteKey").asText());
@@ -168,19 +170,16 @@ public class QuoteServiceImpl implements QuoteService {
                             quotes.add(quoteVO);
 
                     });
-//                    fetchQuoteResponseVO.setEnquiryId(responseJson.get("enquiryId").asText());
-//                    fetchQuoteResponseVO.setTenure(quoteRequestVO.getTenure());
-                    fetchQuoteResponseVO.setItems(quotes);
-                    return Mono.just(fetchQuoteResponseVO);
+                    return Mono.just(quotes.get(0));
                 }
-//                fetchQuoteResponseVO.setErrorMsg("Unable to get Quotes.");
-                return Mono.just(fetchQuoteResponseVO);
+                quoteResVO.setErrorMessage(ErrorMessageKey.UNABLE_TO_GET_QUOTE_FROM_VENDOR.getValue());
+                return Mono.just(new QuoteResVO());
             }
-//            fetchQuoteResponseVO.setErrorMsg("Unable to get Quotes.");
-            return Mono.just(fetchQuoteResponseVO);
+            quoteResVO.setErrorMessage(ErrorMessageKey.UNABLE_TO_GET_QUOTE_FROM_VENDOR.getValue());
+            return Mono.just(quoteResVO);
         } catch (Exception e) {
-//            fetchQuoteResponseVO.setErrorMsg("Exception occurred.");
-            return Mono.just(fetchQuoteResponseVO);
+            quoteResVO.setErrorMessage(ErrorMessageKey.EXCEPTION_OCCURRED.getValue());
+            return Mono.just(quoteResVO);
         }
     }
 

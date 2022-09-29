@@ -7,7 +7,11 @@ public enum ErrorMessageKey {
 
     INVALID_TOKEN("invalid.token"),
 
-    INVALID_SECURITY_CONTEXT("invalid.security.context");
+    INVALID_SECURITY_CONTEXT("invalid.security.context"),
+
+    EXCEPTION_OCCURRED("exception.occurred"),
+
+    UNABLE_TO_GET_QUOTE_FROM_VENDOR("unable.to.get.quote.from.vendor");
 
 
     private final String value;
